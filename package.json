@@ -1,0 +1,17 @@
+{
+  "name": "pokemon-emerald",
+  "version": "1.0.0",
+  "description": "I am trying to write pokemon emerald from scratch.",
+  "source": "src/index.html",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel": "^2.12.0"
+  }
+}
