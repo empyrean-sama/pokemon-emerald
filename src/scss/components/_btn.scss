@@ -1,0 +1,26 @@
+@import '../color';
+@import '../spacing';
+
+.btn{
+    outline: none;
+    border: none;
+    cursor: pointer;
+
+    width: 12rem;
+    padding: var(--spacing-2-5);
+    border-radius: 5px;
+}
+
+.btn.btn-primary {
+    transition: all .1s ease-in-out;
+
+    background-color: var(--black);
+    color: var(--white);
+    position: relative;
+    box-shadow: var(--white) 4px 4px 0 0,var(--black) 4px 4px 0 1px;
+
+    &:active{
+        box-shadow: var(--white) 2px 2px 0 0, var(--black) 2px 2px 0 1px;
+        transform: translate(2px, 2px);
+    }
+}

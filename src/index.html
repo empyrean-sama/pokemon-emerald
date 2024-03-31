@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Window</title>
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.scss">
 </head>
-<body></body>
+<body>
+    <script type="module" src="./main.ts"></script>
+    <div class="container" id="container">
+        <!-- insert the pixie.js view here -->
+        <div class="size-control-panel" id="size-control-panel">
+            <button class="btn btn-primary" id="set-canvas-size-original">Original</button>
+            <button class="btn btn-primary" id="set-canvas-size-2x">2x</button>
+            <button class="btn btn-primary" id="set-canvas-size-4x">4x</button>
+            <button class="btn btn-primary" id="set-canvas-size-fill">Fill</button>
+        </div>
+    </div>
+</body>
 </html>
