@@ -4,4 +4,5 @@
  */
 export default class GlobalState {
     public static delta: number = 0;
+    public static viewDimensions = {width: 240, height: 160}
 }

@@ -9,9 +9,8 @@ import GlobalState from "./Engine/Systems/GlobalState";
 import CTransformComponent from "./Engine/components/CTransformComponent";
 import Vec2 from "./Engine/Constructs/Vec2";
 import { CanvasDisplaySizeClasses, fillSizeBtnClicked, fourTimesSizeBtnClicked, originalSizeBtnClicked, twoTimesSizeBtnClicked } from "./CanvasResizingCallbacks";
-
-const width: number = 240; //this is passed into Pixi.js when creating the app
-const height: number = 160; //this is passed into Pixi.js when creating the app
+import CCameraComponent, { addCameraComponent } from "./Engine/components/CCameraComponent";
+import Input from "./Engine/Systems/Input";
 
 //Buttons when clicked that resize the main game canvas
 const originalSizeBtn: HTMLButtonElement = document.getElementById('set-canvas-size-original') as HTMLButtonElement;
@@ -26,8 +25,8 @@ const fillSizeBtn: HTMLButtonElement = document.getElementById('set-canvas-size-
 
     //Create the app and initialize it
     const app = new Application();
-    await app.init({ background: 'magenta', width, height });
-
+    await app.init({ background: 'magenta', width: GlobalState.viewDimensions.width, height: GlobalState.viewDimensions.height });
+    
     //Pixi.js generates its output on a canvas, append it to the correct place. 
     const container = document.getElementById('container') as HTMLDivElement;
     const appCanvas = app.canvas;
@@ -60,7 +59,36 @@ const fillSizeBtn: HTMLButtonElement = document.getElementById('set-canvas-size-
     addScriptComponent(bunnyActor,() => {
         console.log('on start called');
     }, (me: Actor, delta: number) => {
+
         const transformComponent = me.getComponent(CTransformComponent) as CTransformComponent;
-        transformComponent.position.add(new Vec2(.5,.3));
+        if(Input.getInput().isKeyPressed(Input.keyW)){
+            transformComponent.position.add(new Vec2(0,.3));
+        }
+        else if(Input.getInput().isKeyPressed(Input.keyS)){
+            transformComponent.position.add(new Vec2(0,-.3));
+        }
+        else if(Input.getInput().isKeyPressed(Input.keyA)){
+            transformComponent.position.add(new Vec2(-.3,0));
+        }
+        else if(Input.getInput().isKeyPressed(Input.keyD)){
+            transformComponent.position.add(new Vec2(.3,0));
+        }
     })
+    const cameraComponent = addCameraComponent(bunnyActor,true) as CCameraComponent;
+    cameraComponent.setAsMainCamera();
+
+    const bunnyProp1 = new Actor();
+    addSpriteComponent(bunnyProp1,strBunnyPath);
+    const bp1TC = bunnyProp1.getComponent(CTransformComponent) as CTransformComponent;
+    bp1TC.position = new Vec2(10,0);
+
+    const bunnyProp2 = new Actor();
+    addSpriteComponent(bunnyProp2,strBunnyPath);
+    const bp2TC = bunnyProp2.getComponent(CTransformComponent) as CTransformComponent;
+    bp2TC.position = new Vec2(0,10);
+
+    const bunnyProp3 = new Actor();
+    addSpriteComponent(bunnyProp3,strBunnyPath);
+    const bp3TC = bunnyProp3.getComponent(CTransformComponent) as CTransformComponent;
+    bp3TC.position = new Vec2(-10,0);
 })();

@@ -33,13 +33,16 @@ export default class ScriptProcessor extends Processor {
     public override Process(): void {
         const globalStore = GlobalComponentStore.getGlobalComponentStore();
         globalStore.getAllActorsInStore().forEach((actor: Actor) => {
-            const scriptComponent = actor.getComponent(CScriptComponent) as CScriptComponent;
-            if(!this.componentsWhoseOnStartWasCalled.has(scriptComponent)){
-                //must call on start on this component
-                scriptComponent.onStart(actor);
-                this.componentsWhoseOnStartWasCalled.add(scriptComponent); //onStart will only be called once
+            const scriptComponent = actor.getComponent(CScriptComponent) as CScriptComponent | null;
+            if(scriptComponent)
+            {
+                if(!this.componentsWhoseOnStartWasCalled.has(scriptComponent)){
+                    //must call on start on this component
+                    scriptComponent.onStart(actor);
+                    this.componentsWhoseOnStartWasCalled.add(scriptComponent); //onStart will only be called once
+                }
+                scriptComponent.onProcess(actor,GlobalState.delta);
             }
-            scriptComponent.onProcess(actor,GlobalState.delta);
         });
     }
 }

@@ -18,13 +18,16 @@ export default class Actor {
      * This method can be used to add a component to the actor in question, simply specify which component by passing in the constructor function
      * @param componentType: the constructor function of the component to be constructed
      */
-    public addComponent<T extends CComponent>(componentType: Type<T>, ...args: any[]){
+    public addComponent<T extends CComponent>(componentType: Type<T>, ...args: any[]): T {
         //Create the component in question
         const component = new componentType(this,...args);
         
         //Registering it on the global store means it will be available for all the processes inside the engine
         const globalComponentStore = GlobalComponentStore.getGlobalComponentStore();
         globalComponentStore.registerComponent(this,component);
+
+        //Return a handle to the created component
+        return component;
     }
 
     /**

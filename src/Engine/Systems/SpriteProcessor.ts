@@ -5,6 +5,9 @@ import GlobalComponentStore from "./GlobalComponentStore";
 
 import Processor from "./Processor";
 import CTransformComponent from "../components/CTransformComponent";
+import Vec2 from "../Constructs/Vec2";
+import GlobalState from "./GlobalState";
+import CCameraComponent from "../components/CCameraComponent";
 
 let spriteProcessor: SpriteProcessor | null = null;
 
@@ -13,10 +16,15 @@ let spriteProcessor: SpriteProcessor | null = null;
  */
 export default class SpriteProcessor extends Processor {
 
-    private _worldStage: Container | undefined = undefined;
-
+    //The world stage on which all pixi sprites reside
+    private _worldStage: Container | undefined = undefined; 
+    
+    //A Handle to the main camera component,
+    //todo: revisit this when thinking about the death of an actor
+    private _mainCameraComponent: CCameraComponent | null = null; 
+    
     /**
-     * Developer must not be allowed to construct a sprite processor, its a singleton
+     * A specific processor is a singleton
      */
     private constructor(){
         super();
@@ -41,18 +49,37 @@ export default class SpriteProcessor extends Processor {
         // Try start processing
         const globalStore = GlobalComponentStore.getGlobalComponentStore();
         globalStore.getAllActorsInStore().forEach((actor: Actor) => {
-            const spriteComponent = actor.getComponent(CSpriteComponent) as CSpriteComponent;
-            const transformComponent = actor.getComponent(CTransformComponent) as CTransformComponent;
-            if(spriteComponent){
+            const transformComponent = actor.getComponent(CTransformComponent) as CTransformComponent; //Every actor will definitely have a transform component
+            const spriteComponent = actor.getComponent(CSpriteComponent) as CSpriteComponent | null;
+            const cameraComponent = actor.getComponent(CCameraComponent) as CCameraComponent | null;
+            
+            //Move the camera to the actor location if a camera component exists and its _attach to actor flag is set to true
+            if(cameraComponent && cameraComponent._attachToActor === true){
+                cameraComponent.setPosition(transformComponent.position);
+            }
+
+            //If a sprite component exists, then draw it onto the screen
+            if(spriteComponent) {
+                //Get a handle to the underlying sprite object in Pixi world 
                 const pixiSprite: Sprite = spriteComponent.getPixiSprite();
-                pixiSprite.position = {x: transformComponent.position.x, y: transformComponent.position.y};
+                
+                //Update position in Pixi world
+                let cameraAdjustedWorldCoordinates: Vec2 = new Vec2(transformComponent.position.x,transformComponent.position.y);
+                if(this._mainCameraComponent){
+                    //A camera exists, use it to view the world
+                    cameraAdjustedWorldCoordinates = worldCoordinatesToCameraAdjustedWorldCoordinatesTransformer(transformComponent.position,this._mainCameraComponent.getPosition())
+                }
+                const viewCoordinates = worldToViewCoordinateTransformer(cameraAdjustedWorldCoordinates);
+                pixiSprite.position = {x: viewCoordinates.x, y: viewCoordinates.y};
+
+                //Update rotation in Pixi world
                 pixiSprite.rotation = transformComponent.rotation;
             }
         });
     }
 
     /**
-     *! initializing can have unforeseen consequences, Its definitely a horrible idea to do it in a sprite  
+     *! Initializing can have unforeseen consequences, Its definitely a horrible idea to do it in a sprite  
      */
     public initializeSpriteProcessor(worldStage: Container){
         this._worldStage = worldStage;
@@ -67,4 +94,36 @@ export default class SpriteProcessor extends Processor {
         }
         this._worldStage.addChild(sprite);
     }
+
+    /**
+     *? Not recommended to call this API, it is generally called internally from the CCamera component to set itself up as the main camera
+     * @param cameraComponent 
+     */
+    public setAsMainCamera(cameraComponent: CCameraComponent){
+        this._mainCameraComponent = cameraComponent;
+    }
+}
+
+/**
+ * This function is used to move an object in the world so that it is now being looked at the 
+ * The function helps to move the world in such a way that the camera origin now lines up with the world origin
+ * Inputs are not mutated in any way
+ * @param worldCoordinates: world coordinates of the object in question
+ * @param cameraCoordinates: camera coordinates of the main camera 
+ */
+function worldCoordinatesToCameraAdjustedWorldCoordinatesTransformer(worldCoordinates: Vec2, cameraCoordinates: Vec2): Vec2 { 
+    return new Vec2(worldCoordinates.x - cameraCoordinates.x, worldCoordinates.y - cameraCoordinates.y);
+}
+
+/**
+ * This function is used to transform world coordinates on the transform component into view coordinates required by the renderer
+ * This function will not mutate the input object in any way
+ * @param worldCoordinates: these are the world coordinates generally received from the transform component
+ * @returns view coordinates which the renderer requires
+ */
+function worldToViewCoordinateTransformer(worldCoordinates: Vec2): Vec2 {
+    const viewCoordinates: Vec2 = new Vec2(0,0);
+    viewCoordinates.x = worldCoordinates.x + (GlobalState.viewDimensions.width / 2);
+    viewCoordinates.y =  (worldCoordinates.y * -1) + (GlobalState.viewDimensions.height / 2);
+    return viewCoordinates;
 }
