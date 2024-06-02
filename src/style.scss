@@ -5,4 +5,26 @@
 @import './scss/components/container';
 @import './scss/components/btn';
 @import './scss/components/size-control-panel';
-@import './scss/components/pixi-canvas';
+
+canvas{
+    transition: all .2s ease-in-out;
+}
+
+canvas.size-original{
+    width: 240px;
+    height: 160px;
+}
+
+canvas.size-two-times{
+    width: 480px;
+    height: 320px;
+}
+
+canvas.size-four-times{
+    width: 960px;
+    height: 640px;
+}
+
+canvas.size-fill{
+    height: 100vh;
+}

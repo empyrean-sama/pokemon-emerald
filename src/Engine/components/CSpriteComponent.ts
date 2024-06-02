@@ -1,7 +1,29 @@
 import Actor from "../Actor";
 import SpriteProcessor from "../Systems/SpriteProcessor";
 import CComponent,{ComponentRegistry} from "./CComponent";
-import { Assets,Sprite,Texture } from "pixi.js";
+import { vec2 } from "gl-matrix";
+
+export class UVRect {
+    public topLeft: vec2;
+    public topRight: vec2;
+    public bottomRight: vec2;
+    public bottomLeft: vec2;
+
+    /**
+     * Constructor function creates this structure, 
+     * the default is using the whole texture as per webGPU, which means top left is 0,0
+     * @param topLeft : top left uv coordinate
+     * @param topRight : top right uv coordinate
+     * @param bottomLeft : bottom left uv coordinate
+     * @param bottomRight : bottom right uv coordinate
+     */
+    constructor(topLeft?: vec2, topRight?: vec2, bottomLeft?: vec2, bottomRight?: vec2) {
+        this.topLeft = topLeft || vec2.set(vec2.create(),0,0);
+        this.topRight = topRight || vec2.set(vec2.create(),1,0);
+        this.bottomRight = bottomRight || vec2.set(vec2.create(),1,1);
+        this.bottomLeft = bottomLeft || vec2.set(vec2.create(),0,1);
+    }
+}
 
 export default class CSpriteComponent extends CComponent{
     
@@ -13,32 +35,44 @@ export default class CSpriteComponent extends CComponent{
         return ComponentRegistry.CSpriteComponent;
     }
 
-    //Create and initialize the state
-    private _sprite: Sprite;
-    constructor(owningActor: Actor, sprite: Sprite) {
+    private _textureURL: string = '';
+    private _uvCoordinatesRect: UVRect;
+
+    constructor(owningActor: Actor, textureURL: string, uvCoordinates: UVRect) {
+        //register this component on the actor
         super(owningActor);
-        this._sprite = sprite;
-        
-        //Add the Pixi sprite to be processed
-        const spriteProcessor: SpriteProcessor = SpriteProcessor.getProcessor();
-        spriteProcessor.addIntoWorldStage(sprite);
+
+        //fill up the component memory
+        this._textureURL = textureURL;
+        this._uvCoordinatesRect = uvCoordinates;
+
+        //Sprite processor must actively monitor and draw this component to screen
+        const spriteProcessor = SpriteProcessor.getProcessor();
+        spriteProcessor.register(owningActor);
+        spriteProcessor.submitTextureURL(this._textureURL);
     }
 
     /**
-     * ! DON'T use this method outside processor, the only reason to expose this method is because typescript has no equivalent to friend. Pixi.js's version of sprite should not be used in this engine and wrappers need to be constructed wherever required, failing this will mean type problems and an inability to change renderer's in the future
+     * ! Not recommended to use this method outside processor, the only reason to expose this method is because typescript has no equivalent to friend.
      */
-    public getPixiSprite(): Sprite{
-        return this._sprite;
+    public getTextureURL(): string {
+        return this._textureURL;
+    }
+
+    /**
+     * ! Not recommended to use this method outside processor, the only reason to expose this method is because typescript has no equivalent to friend.
+     */
+    public getUVCoordinates(): UVRect {
+        return this._uvCoordinatesRect;
     }
 }
 
 /**
- * An async utility function which adds a sprite component on an actor
+ * A utility function which adds a sprite component on an actor
  * @param actor the actor on which this component needs to be added
- * @param spriteResourcePath the resource path to the image used by this sprite
+ * @param textureURL the url of the texture used in this sprite
+ * @param uvCoordinates the uvCoordinates of the sprite inside the texture, if passed in something falsey, the default is using the whole texture
  */
-export async function addSpriteComponent(actor: Actor, spriteResourcePath: string){
-    const texture: Texture = await Assets.load(spriteResourcePath);
-    const sprite: Sprite = new Sprite(texture);
-    actor.addComponent(CSpriteComponent,sprite);
+export function addSpriteComponent(actor: Actor, textureURL: string, uvCoordinates?: UVRect) {
+    actor.addComponent(CSpriteComponent, textureURL, uvCoordinates || new UVRect());
 }
