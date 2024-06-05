@@ -94,7 +94,7 @@ import Input from "./Engine/Systems/Input";
 function initializeGame(){
     const bunnyActor: Actor = new Actor();
     addSpriteComponent(bunnyActor, strBunnyPath);
-    addCameraComponent(bunnyActor);
+    addCameraComponent(bunnyActor).setAsMainCamera();
 }
 
 /**
@@ -102,5 +102,5 @@ function initializeGame(){
  */
 function drawFrame(){
     SpriteProcessor.getProcessor().process();
-    // requestAnimationFrame(drawFrame);
+    requestAnimationFrame(drawFrame);
 }

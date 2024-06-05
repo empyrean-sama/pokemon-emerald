@@ -38,12 +38,12 @@ export default class CCameraComponent extends CComponent {
         //set up the position, rotation and scale if passed in
         if(position)
         {
-            const posVec = vec3.set(vec3.create(),position[0] || 0.0,position[1] || 0.0, 0.0);
+            const posVec = vec3.set(vec3.create(), position[0] || 0.0, position[1] || 0.0, 0.0);
             mat4.translate(this._viewMatrix,this._viewMatrix, posVec);
         }
         if(rotation)
         {
-            mat4.rotate(this._viewMatrix, this._viewMatrix, rotation,vec3.set(vec3.create(),0,0,1));
+            mat4.rotate(this._viewMatrix, this._viewMatrix, rotation, vec3.set(vec3.create(),0,0,1));
         }
         if(scale)
         {

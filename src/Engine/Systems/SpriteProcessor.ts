@@ -155,16 +155,16 @@ export default class SpriteProcessor extends Processor {
             entryPoint: 'vertexMain',
             buffers: [
                 {
-                    arrayStride: 5 * Float32Array.BYTES_PER_ELEMENT, //3 per position and 2 per texture coordinates
+                    arrayStride: 6 * Float32Array.BYTES_PER_ELEMENT, //4 per position and 2 per texture coordinates
                     attributes: [
                         {
-                            format: 'float32x3',
+                            format: 'float32x4',
                             offset: 0,
                             shaderLocation: 0
                         },
                         {
                             format: 'float32x2',
-                            offset: 3 * Float32Array.BYTES_PER_ELEMENT,
+                            offset: 4 * Float32Array.BYTES_PER_ELEMENT,
                             shaderLocation: 1
                         }
                     ],
@@ -224,10 +224,15 @@ export default class SpriteProcessor extends Processor {
 
     public override process(): void {
         if(this.isProcessorInitialized() === false) {
-            console.warn('process method called when the sprite processor is not yet initialized');
+            console.warn('process method called when the sprite processor is not yet initialized, so ignoring this call');
             return;
-            // throw new Error('process method called when the sprite processor is not yet initialized');
         }
+
+        //Clear Buffers
+        this._gpuBuffers.forEach((bufferMapEntry: BufferMapEntry) => {
+            bufferMapEntry.indexBufferCounts = [0];
+            bufferMapEntry.vertexBufferCounts = [0];
+        })
 
         //Regenerate buffers
         this._actorsInConsideration.forEach((actor) => {
@@ -252,8 +257,12 @@ export default class SpriteProcessor extends Processor {
             //If the entry on this map has the current vertex buffer full, create a new buffer
             const entry: BufferMapEntry = this._gpuBuffers.get(textureURL)!;
             if(entry.vertexBufferCounts[entry.vertexBufferCounts.length -1] >= this.MAX_NUMBER_OF_VERTICES){
-                entry.vertexBuffers.push(this.createVertexBuffer(this.MAX_NUMBER_OF_VERTICES * this.SIZE_PER_VERTEX));
-                entry.indexBuffers.push(this.createIndexBuffer(this.MAX_NUMBER_OF_INDICES * this.SIZE_PER_INDEX));
+                if(!entry.vertexBuffers[entry.vertexBufferCounts.length -1]){
+                    entry.vertexBuffers.push(this.createVertexBuffer(this.MAX_NUMBER_OF_VERTICES * this.SIZE_PER_VERTEX));
+                }
+                if(!entry.indexBuffers[entry.vertexBufferCounts.length -1]){
+                    entry.indexBuffers.push(this.createIndexBuffer(this.MAX_NUMBER_OF_INDICES * this.SIZE_PER_INDEX));
+                }
                 entry.vertexBufferCounts.push(0);
                 entry.indexBufferCounts.push(0);
             }
@@ -264,22 +273,20 @@ export default class SpriteProcessor extends Processor {
             
             //this is every actor, the unique transform of a particular actor will only come from its transform component
             const modelMatrix = transformComponent.getModelMatrix();
-            const actorTopLeft      = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(),-8.0, 8.0,0.0,0.0), modelMatrix);
-            const actorTopRight     = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(), 8.0, 8.0,0.0,0.0), modelMatrix);
-            const actorBottomLeft   = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(),-8.0,-8.0,0.0,0.0), modelMatrix);
-            const actorBottomRight  = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(), 8.0,-8.0,0.0,0.0), modelMatrix);
+            const actorTopLeft      = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(),-8.0, 8.0, 0.0, 1.0), modelMatrix);
+            const actorTopRight     = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(), 8.0, 8.0, 0.0, 1.0), modelMatrix);
+            const actorBottomRight  = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(), 8.0,-8.0, 0.0, 1.0), modelMatrix);
+            const actorBottomLeft   = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(),-8.0,-8.0, 0.0, 1.0), modelMatrix);
 
             const uvRect = spriteComponent.getUVCoordinates();
-
-            const data = [
+            
+            this._device?.queue.writeBuffer(vertexBuffer, this.SIZE_PER_VERTEX * vertexCount, new Float32Array([
                 //x,y,z,w coordinates                                                               //uv coordinates
                 actorTopLeft[0],    actorTopLeft[1],    actorTopLeft[2],    actorTopLeft[3],        uvRect.topLeft[0] ,     uvRect.topLeft[1], 
                 actorTopRight[0],   actorTopRight[1],   actorTopRight[2],   actorTopRight[3],       uvRect.topRight[0],     uvRect.topRight[1],
                 actorBottomRight[0],actorBottomRight[1],actorBottomRight[2],actorBottomRight[3],    uvRect.bottomRight[0],  uvRect.bottomRight[1],
-                actorBottomLeft[0], actorBottomLeft[1], actorBottomLeft[2], actorBottomLeft[3],     uvRect.bottomLeft[0],   uvRect.bottomLeft[1]
-            ];
-
-            this._device?.queue.writeBuffer(vertexBuffer,this.SIZE_PER_VERTEX * vertexCount, data);
+                actorBottomLeft[0], actorBottomLeft[1], actorBottomLeft[2], actorBottomLeft[3],     uvRect.bottomLeft[0],   uvRect.bottomLeft[1],
+            ]));
             entry.vertexBufferCounts[entry.vertexBufferCounts.length - 1] += 4; //4 new vertices are added into the vertex buffer
 
             //Populate the index buffer for the corresponding textureURL entry
@@ -293,8 +300,8 @@ export default class SpriteProcessor extends Processor {
         });
 
         //Regenerate the projection view bind group
-        const projectionViewMatrix = mat4.multiply(mat4.create(),this.generateProjectionMatrix(),this.getMainCamera().getViewMatrix());
-        this._device!.queue.writeBuffer(this._projectionViewBuffer!,0,projectionViewMatrix,0,16 * Float32Array.BYTES_PER_ELEMENT);
+        const projectionViewMatrixData: Float32Array = new Float32Array(mat4.multiply(mat4.create(),this.generateProjectionMatrix(),this.getMainCamera().getViewMatrix()));
+        this._device!.queue.writeBuffer(this._projectionViewBuffer!, 0, projectionViewMatrixData);
         
         const commandEncoder = this._device!.createCommandEncoder();
         const renderPassEncoder = commandEncoder.beginRenderPass({
@@ -315,14 +322,18 @@ export default class SpriteProcessor extends Processor {
         //Issue a atleast one draw call for every texture
         this._gpuBuffers.forEach((bufferMapEntry: BufferMapEntry, textureURL: string)=>{
             const textureBindGroup = this._textureBindGroups.get(textureURL) as GPUBindGroup;
-            renderPassEncoder.setBindGroup(1, textureBindGroup);
+            
+            //It takes time to load a texture and create its bind group, don't try to draw if bind group does not yet exist 
+            if(textureBindGroup){
+                renderPassEncoder.setBindGroup(1, textureBindGroup);
 
-            //Bind vertex and index buffers and start issuing draw calls
-            bufferMapEntry.vertexBuffers.forEach((vertexBuffer: GPUBuffer,index) => {
-                renderPassEncoder.setVertexBuffer(0,vertexBuffer);
-                renderPassEncoder.setIndexBuffer(bufferMapEntry.indexBuffers[index],"uint16");
-                renderPassEncoder.drawIndexed(bufferMapEntry.indexBufferCounts[index]);
-            });
+                //Bind vertex and index buffers and start issuing draw calls
+                bufferMapEntry.vertexBuffers.forEach((vertexBuffer: GPUBuffer,index) => {
+                    renderPassEncoder.setVertexBuffer(0,vertexBuffer);
+                    renderPassEncoder.setIndexBuffer(bufferMapEntry.indexBuffers[index],"uint16");
+                    renderPassEncoder.drawIndexed(bufferMapEntry.indexBufferCounts[index]);
+                });
+            }
         });
 
         renderPassEncoder.end();
@@ -397,12 +408,12 @@ export default class SpriteProcessor extends Processor {
                 console.warn(`Allocated buffer size is less than the required amount to fill the vertex buffer
                 Allocated Size: ${bufferSize}, Required Bytes: ${requiredAmountOfBytes}`);
             }
-            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.VERTEX, true);
+            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST, true);
             new Float32Array(gpuBuffer.getMappedRange()).set(data);
             gpuBuffer.unmap();
         }
         else {
-            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.VERTEX, false);
+            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST, false);
         }
 
         return gpuBuffer;
@@ -424,12 +435,12 @@ export default class SpriteProcessor extends Processor {
                 console.warn(`Allocated buffer size is less than the required amount to fill the index buffer
                 Allocated Size: ${bufferSize}, Required Bytes: ${requiredAmountOfBytes}`);
             }
-            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.INDEX, true);
+            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST, true);
             new Uint32Array(gpuBuffer.getMappedRange()).set(data);
             gpuBuffer.unmap();
         }
         else {
-            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.INDEX, false);
+            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST, false);
         }
 
         return gpuBuffer;
@@ -452,12 +463,12 @@ export default class SpriteProcessor extends Processor {
                 console.warn(`Allocated buffer size is less than the required amount to fill the uniform buffer
                 Allocated Size: ${bufferSize}, Required Bytes: ${requiredAmountOfBytes}`);
             }
-            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.UNIFORM, true);
+            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST, true);
             new Float32Array(gpuBuffer.getMappedRange()).set(data);
             gpuBuffer.unmap();
         }
         else {
-            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.UNIFORM, false);
+            gpuBuffer = this.createBuffer(bufferSize, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST, false);
         }
 
         return gpuBuffer;
@@ -535,8 +546,8 @@ export default class SpriteProcessor extends Processor {
      * Utility method that can be used to generate the projection matrix based on settings in the GlobalState
      */
     private generateProjectionMatrix(): mat4 {
-        const right = GlobalState.viewDimensions.width / 2;
-        const top = GlobalState.viewDimensions.height / 2;
+        const right: number = GlobalState.viewDimensions.width / 2;
+        const top: number = GlobalState.viewDimensions.height / 2;
         return mat4.ortho(mat4.create(),-1*right,right,-1*top,top,-1.0,1.0);
     }
 }
