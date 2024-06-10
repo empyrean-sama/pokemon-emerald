@@ -293,8 +293,8 @@ export default class SpriteProcessor extends Processor {
             const indexBuffer: GPUBuffer = entry.indexBuffers[entry.indexBuffers.length - 1];
             const indexCount: number = entry.indexBufferCounts[entry.indexBufferCounts.length - 1];
             this._device!.queue.writeBuffer(indexBuffer, this.SIZE_PER_INDEX * indexCount, new Uint16Array([
-                indexCount, indexCount+1, indexCount+2,
-                indexCount+2, indexCount+3, indexCount
+                vertexCount, vertexCount+1, vertexCount+2,
+                vertexCount+2, vertexCount+3, vertexCount
             ]));
             entry.indexBufferCounts[entry.indexBufferCounts.length - 1] += 6; //6 new vertices were added into the index buffer
         });
