@@ -35,6 +35,6 @@ export default class Actor {
      * @param componentType: try to get this type of component on the actor
      */
     public getComponent<T extends CComponent>(componentType: Type<T>): CComponent | null {
-        return GlobalComponentStore.getGlobalComponentStore().getComponent(this,componentType);
+        return GlobalComponentStore.getGlobalComponentStore().getComponent(this, componentType);
     }
 }

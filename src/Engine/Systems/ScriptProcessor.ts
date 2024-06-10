@@ -1,7 +1,5 @@
 import Actor from "../Actor";
 import CScriptComponent from "../components/CScriptComponent";
-import GlobalComponentStore from "./GlobalComponentStore";
-import GlobalState from "./GlobalState";
 import Processor from "./Processor";
 
 let scriptProcessor: ScriptProcessor | null = null;
@@ -24,24 +22,23 @@ export default class ScriptProcessor extends Processor {
         }
         return scriptProcessor; 
     }
+    
+    // This stack is a collection of objects on which onStart needs to be called, the stack is checked once every process call
+    private _onStartFinishedList: WeakSet<CScriptComponent> = new WeakSet<CScriptComponent>();
 
     /**
-     * This member is used to keep track of all the onStart calls already made
+     * Iterate through all CScriptComponents and try calling onTick function, if OnStart is not yet called once, then try calling onStart instead
      */
-    private componentsWhoseOnStartWasCalled = new WeakSet<CScriptComponent>();
-
-    public override Process(): void {
-        const globalStore = GlobalComponentStore.getGlobalComponentStore();
-        globalStore.getAllActorsInStore().forEach((actor: Actor) => {
-            const scriptComponent = actor.getComponent(CScriptComponent) as CScriptComponent | null;
-            if(scriptComponent)
-            {
-                if(!this.componentsWhoseOnStartWasCalled.has(scriptComponent)){
-                    //must call on start on this component
-                    scriptComponent.onStart(actor);
-                    this.componentsWhoseOnStartWasCalled.add(scriptComponent); //onStart will only be called once
-                }
-                scriptComponent.onProcess(actor,GlobalState.delta);
+    public override process(): void {
+        this._actorsInConsideration.forEach((actor: Actor) => {
+            const scriptComponent: CScriptComponent = actor.getComponent(CScriptComponent) as CScriptComponent;
+            
+            if(this._onStartFinishedList.has(scriptComponent) === false){
+                scriptComponent.onStart();
+                this._onStartFinishedList.add(scriptComponent);
+            }
+            else{
+                scriptComponent.onTick(1); //todo: pass in correct delta
             }
         });
     }
