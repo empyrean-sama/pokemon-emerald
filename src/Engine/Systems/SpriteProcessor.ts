@@ -273,10 +273,10 @@ export default class SpriteProcessor extends Processor {
             
             //this is every actor, the unique transform of a particular actor will only come from its transform component
             const modelMatrix = transformComponent.getModelMatrix();
-            const actorTopLeft      = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(),-8.0, 8.0, 0.0, 1.0), modelMatrix);
-            const actorTopRight     = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(), 8.0, 8.0, 0.0, 1.0), modelMatrix);
-            const actorBottomRight  = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(), 8.0,-8.0, 0.0, 1.0), modelMatrix);
-            const actorBottomLeft   = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(),-8.0,-8.0, 0.0, 1.0), modelMatrix);
+            const actorTopLeft      = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(),-GlobalState.spriteDimensions.width / 2, GlobalState.spriteDimensions.height / 2, 0.0, 1.0), modelMatrix);
+            const actorTopRight     = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(), GlobalState.spriteDimensions.width / 2, GlobalState.spriteDimensions.height / 2, 0.0, 1.0), modelMatrix);
+            const actorBottomRight  = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(), GlobalState.spriteDimensions.width / 2,-GlobalState.spriteDimensions.height / 2, 0.0, 1.0), modelMatrix);
+            const actorBottomLeft   = vec4.transformMat4(vec4.create(), vec4.set(vec4.create(),-GlobalState.spriteDimensions.width / 2,-GlobalState.spriteDimensions.height / 2, 0.0, 1.0), modelMatrix);
 
             const uvRect = spriteComponent.getUVCoordinates();
             
