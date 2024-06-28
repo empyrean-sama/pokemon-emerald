@@ -46,10 +46,10 @@ export default class CTransformComponent extends CComponent {
     /**
      * Utility function to set position
      * @returns this component so that operations can be chained
-     * ! NOT IMPLEMENTED
      */
     public setPosition(position: vec2){
-        throw new Error('not implemented setPosition in CTransformComponent')
+        this._transform[12] = position[0];
+        this._transform[13] = position[1];
     }
     /**
      * Utility function to translate
@@ -58,6 +58,14 @@ export default class CTransformComponent extends CComponent {
     public translate(translateBy: vec2): CTransformComponent {
         mat4.translate(this._transform, this._transform, vec3.set(vec3.create(), translateBy[0], translateBy[1], 0.0));
         return this;
+    }
+    /**
+     * Utility function to get the position
+     * @return vec2 position of the actor
+     */
+    public getPosition(): vec2 {
+        const position = mat4.getTranslation(vec3.create(),this._transform);
+        return vec2.set(vec2.create(),position[0],position[1]);
     }
 
     /**

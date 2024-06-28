@@ -1,9 +1,16 @@
 {
     "cSpell.words": [
+        "draworder",
         "endregion",
         "falsey",
         "IIFE",
         "Pixi",
+        "snek",
+        "tileheight",
+        "tileset",
+        "tilesets",
+        "tilewidth",
+        "topdown",
         "unorm"
     ]
 }

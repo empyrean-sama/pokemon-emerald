@@ -37,4 +37,11 @@ export default class Actor {
     public getComponent<T extends CComponent>(componentType: Type<T>): CComponent | null {
         return GlobalComponentStore.getGlobalComponentStore().getComponent(this, componentType);
     }
+
+    /**
+     * The transform component is something that is regularly accessed and is available on all actors, this is an easy utility to access this component
+     */
+    public getTransformComponent(): CTransformComponent {
+        return this.getComponent(CTransformComponent) as CTransformComponent;
+    }
 }
