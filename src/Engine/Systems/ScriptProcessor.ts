@@ -1,5 +1,7 @@
 import Actor from "../Actor";
+import CComponent from "../components/CComponent";
 import CScriptComponent from "../components/CScriptComponent";
+import GlobalComponentStore from "./GlobalComponentStore";
 import Processor from "./Processor";
 
 let scriptProcessor: ScriptProcessor | null = null;
@@ -30,7 +32,7 @@ export default class ScriptProcessor extends Processor {
      * Iterate through all CScriptComponents and try calling onTick function, if OnStart is not yet called once, then try calling onStart instead
      */
     public override process(): void {
-        this._actorsInConsideration.forEach((actor: Actor) => {
+        this.getActorsInConsideration().forEach((actor: Actor) => {
             const scriptComponent: CScriptComponent = actor.getComponent(CScriptComponent) as CScriptComponent;
             
             if(this._onStartFinishedList.has(scriptComponent) === false){
@@ -41,5 +43,14 @@ export default class ScriptProcessor extends Processor {
                 scriptComponent.onTick(1); //todo: pass in correct delta
             }
         });
+    }
+
+    /**
+     * The ScriptProcessor is primarily concerned about actors containing the script component
+     * @returns all actors containing the script component
+     */
+    public override getActorsInConsideration(): Actor[] {
+        const globalComponentStore = GlobalComponentStore.getGlobalComponentStore();
+        return globalComponentStore.getComponents(CScriptComponent.getComponentType()).map((component: CComponent) => component.getOwningActor());
     }
 }

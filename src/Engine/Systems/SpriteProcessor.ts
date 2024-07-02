@@ -8,6 +8,8 @@ import CCameraComponent from "../components/CCameraComponent";
 import defaultSpriteShader from "bundle-text:./Shaders/defaultSpriteShader.wgsl";
 import { mat4, vec3, vec4 } from "gl-matrix";
 import Actor from "../Actor";
+import GlobalComponentStore from "./GlobalComponentStore";
+import CComponent from "../components/CComponent";
 
 let spriteProcessor: SpriteProcessor | null = null;
 
@@ -126,12 +128,21 @@ export default class SpriteProcessor extends Processor {
             this._textureBindGroups.set(textureURL, bindGroup);
         }
     }
+
+    /**
+     * The SpriteProcessor is primarily concerned about actors with a sprite component
+     * @returns all actors that posses a sprite component
+     */
+    public override getActorsInConsideration(): Actor[] {
+        const globalComponentStore = GlobalComponentStore.getGlobalComponentStore();
+        return globalComponentStore.getComponents(CSpriteComponent.getComponentType()).map((component: CComponent) => component.getOwningActor());
+    }
     
     /**
      * This function is used to initialize the sprite processor
      * ! This method is only made public so that the sprite processor can be initialized in main, must probably never call this elsewhere 
      */
-    public async initialize(){
+    public override async initialize(){
 
         //Get context and adapter
         const canvasContext = GlobalState.view.getContext("webgpu");
@@ -235,7 +246,7 @@ export default class SpriteProcessor extends Processor {
         })
 
         //Regenerate buffers
-        this._actorsInConsideration.forEach((actor) => {
+        this.getActorsInConsideration().forEach((actor) => {
             //Get required components
             const spriteComponent = actor.getComponent(CSpriteComponent) as CSpriteComponent;
             const transformComponent = actor.getComponent(CTransformComponent) as CTransformComponent;

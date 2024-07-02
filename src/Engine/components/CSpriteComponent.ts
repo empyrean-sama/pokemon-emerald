@@ -48,7 +48,6 @@ export default class CSpriteComponent extends CComponent{
 
         //Sprite processor must actively monitor and draw this component to screen
         const spriteProcessor = SpriteProcessor.getProcessor();
-        spriteProcessor.register(owningActor);
         spriteProcessor.submitTextureURL(this._textureURL);
     }
 

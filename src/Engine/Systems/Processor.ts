@@ -5,25 +5,23 @@ import Actor from "../Actor";
  * todo: what is the frequency with which a processor runs?
  */
 export default abstract class Processor {
+    
+    /**
+     * This method is designed to initialize the processor
+     *? The method will only be called once in the engine's entire lifetime
+     *? All initialize method call's will be awaited before any process method call is ever done
+     *? async is the reason to use this method instead of the constructor
+     */
+    public async initialize(): Promise<void> {}
+    
     /**
      * The main method of every Processor
      */
     public abstract process(): void; 
     
-    protected _actorsInConsideration = new Set<Actor>();
     /**
-     * Processor's cannot process all actors in the scene, the architecture calls for too many of them, this is a way of telling the processor to worry about this given actor 
+     * The concrete process is expected to implement this method and get whatever actors it needs for processing
+     * @returns an array containing all actors the process is interested in
      */
-    public register(actor: Actor): void {
-        if(this._actorsInConsideration.has(actor)){
-            console.warn(`trying to register the actor ${actor.id.toString()} twice, ignoring the second attempt at registration`);
-        }
-        else{
-            this._actorsInConsideration.add(actor);
-        }
-    }
-    /**
-     * Todo: the death of an actor or component is not planned as of now, revisit this method when doing that
-     */
-    public unRegister(actor: Actor){}
+    public abstract getActorsInConsideration(): Actor[];
 }

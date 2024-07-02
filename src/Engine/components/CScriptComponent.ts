@@ -29,9 +29,8 @@ export default class CScriptComponent extends CComponent {
     /**
      * Constructor does nothing special
      */
-    constructor(actor: Actor){
+    constructor(actor: Actor) {
         super(actor);
-        ScriptProcessor.getProcessor().register(actor);
     }
     
     /**
