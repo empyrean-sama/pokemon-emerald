@@ -1,6 +1,12 @@
+# Folders to ignore on build
 node_modules
 .parcel-cache
 dist
 
-src/Engine/scriptMap.ts
-src/Gen/GenerateScriptMap.js
+# The liscense for these tilesets donot include distribution
+src/Image/Tileset/Ice_Cream_Shop_Design_layer_1.png 
+src/Image/Tileset/Ice_Cream_Shop_Design_layer_2.png
+src/Image/Tileset/Ice_Cream_Shop_Design_layer_3.png
+
+# Tiled specific files to ignore
+*.tiled-session
