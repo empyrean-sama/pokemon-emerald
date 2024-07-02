@@ -1,6 +1,7 @@
 import CComponent,{ComponentRegistry} from "./CComponent";
 import Actor from "../Actor";
 import { mat4, vec2, vec3 } from "gl-matrix";
+import GlobalState from "../Systems/GlobalState";
 
 /**
  * This component is created in the actor's constructor by default.
@@ -87,11 +88,18 @@ export default class CTransformComponent extends CComponent {
 
     /**
      * Utility method to set scale on the component
-     *! NOT IMPLEMENTED
-     * @returns 
+     * @params scale: the scale to be set on this component
      */
-    public setScale(scale: vec2){
-        throw new Error('setScale method not yet implemented on component CTransformComponent')
+    public setScale(scale: vec2): void {
+        this._transform[3] = scale[0];
+        this._transform[7] = scale[1];
+    }
+    /**
+     * Utility method to get scale on the component
+     * @returns the scale set on this component
+     */
+    public getScale(): vec2 {
+        return vec2.set(vec2.create(), this._transform[3], this._transform[7]);
     }
     /**
      * Utility function to scale
@@ -100,6 +108,44 @@ export default class CTransformComponent extends CComponent {
     public scale(scale: vec2): CTransformComponent {
         mat4.scale(this._transform, this._transform, vec3.set(vec3.create(), scale[0], scale[1], 1.0));
         return this;
+    }
+
+    /**
+     * Utility function to set width on the transform component
+     * ? Cannot be a property as there is no internal width property on the transform component
+     * ? Width and Scale are fundamentally two different ways of viewing the same thing
+     * @param width: Width to be set in pixels
+     */
+    public setWidth(width: number) {
+        const spriteWidth = GlobalState.spriteDimensions.width;
+        this.setScale(vec2.set(vec2.create(), width / spriteWidth, this.getScale()[1]));
+    }
+    /**
+     * Utility function to get the width set on this transform component
+     * ? Cannot be a property as there is no internal width property used on the transform component
+     * ? Width and Scale are fundamentally two different ways of viewing the same thing
+     * @returns the Width of this actor in pixels
+     */
+    public getWidth(): number {
+        return this.getScale()[0] * GlobalState.spriteDimensions.width;
+    }
+    /**
+     * Utility function to set height on the transform component
+     * ? Cannot be a property as there is no internal height property on the transform component
+     * ? Height and Scale are fundamentally two different ways of viewing the same thing
+     * @param height: Height to be set in pixels
+     */
+    public setHeight(height: number): void {
+        this.setScale(vec2.set(vec2.create(), this.getScale()[0], height / GlobalState.spriteDimensions.height));
+    }
+    /**
+     * Utility function to set Height on the transform component
+     * ? Cannot be a property as there is no internal height property on the transform component
+     * ? Height and scale are fundamentally two different ways of viewing the same thing
+     * @param height: Height to be set in pixels
+     */
+    public getHeight(): number {
+        return this.getScale()[1] * GlobalState.spriteDimensions.height;
     }
 
     public override getComponentType(): string {
