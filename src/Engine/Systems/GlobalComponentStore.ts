@@ -7,14 +7,16 @@ let globalComponentStore: GlobalComponentStore | null = null;
 /**
  * The global component store is a singleton class responsible for ownership over all actors and components in the world
  * This store is also responsible for providing an api to easily navigate between actors and different components
+ * ! Rethink this class to implement the destroy actor API properly with 1000's if not 10's of thousands actors
  */
 export default class GlobalComponentStore {
 
     // map from an actor to all its components
     private _actorMap = new Map<Actor,CComponent[]>();
     
-    // map from a component type string to all components of said type 
-    private _componentTypeMap = new WeakMap<String,CComponent[]>();
+    // map from a component type string to all components of said type
+    //! map here means components must also be deleted from here when deleting actor which I am currently not doing
+    private _componentTypeMap = new Map<string, CComponent[]>();
 
     /**
      * The constructor is made private to force this class to be a singleton
@@ -98,19 +100,21 @@ export default class GlobalComponentStore {
      * Deletes all components associated with the actor..
      *! processes implicitly believe that certain components exist on actors and may behave in an unexpected way when they don't find said components on the actor because of this method call
      *! It's too costly to implement the process method in Processor's to account for not finding a component
+     *! this API is not yet implemented
      * @params actor: the actor whose components have to be deleted
      * @returns a boolean indicating whether all components have been deleted successfully
      */
     public destroyActor(actor: Actor): boolean{
-        return this._actorMap.delete(actor);
+        throw new Error('not implemented');
     }
 
     /**
      * Purge all actors and components from the store
      *? useful in cases like scene change
+     *! this API is not yet implemented
      */
     public purge(): void {
-        this._actorMap.clear();
+        throw new Error('not implemented');
     }
 
     /**

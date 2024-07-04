@@ -12,4 +12,6 @@ export default interface IPackedScene {
     tileheight: number,
     /** Get all the tilesets associated with this scene */
     tilesets: IPackedTileset[],
+    /** The layers on this scene */
+    layers: Array<IPackedSceneLayer>,
 }

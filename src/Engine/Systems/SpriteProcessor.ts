@@ -33,19 +33,16 @@ export default class SpriteProcessor extends Processor {
      *? Not recommended to call this API, it is generally called internally from the CCameraComponent to set itself.
      * @param cameraComponent the camera component which I want to view the world from
      */
-     public setMainCamera(cameraComponent: CCameraComponent){
+    public setMainCamera(cameraComponent: CCameraComponent){
         this._mainCameraComponent = cameraComponent;
     }
 
     /**
      * Utility method to access the main camera component from which the world is being viewed
-     * @throws an Error if there is no mainCameraComponent set
+     * @warns if there is no mainCameraComponent set
      * @returns CCameraComponent from which the world is being viewed
      */
-    public getMainCamera(): CCameraComponent {
-        if(!this._mainCameraComponent){
-            throw new Error('tried to get the main camera component when none exists');
-        }
+    public getMainCamera(): CCameraComponent | null {
         return this._mainCameraComponent;
     }
     
@@ -188,7 +185,19 @@ export default class SpriteProcessor extends Processor {
             entryPoint: 'fragMain',
             targets: [
                 {
-                    format: navigator.gpu.getPreferredCanvasFormat()
+                    format: navigator.gpu.getPreferredCanvasFormat(),
+                    blend: {
+                        color: {
+                            srcFactor: "src-alpha",
+                            dstFactor: "one-minus-src-alpha",
+                            operation: "add"
+                        },
+                        alpha: {
+                            srcFactor: "src-alpha",
+                            dstFactor: "one-minus-src-alpha",
+                            operation: "add"
+                        }
+                    }
                 }
             ]
         };
@@ -311,7 +320,7 @@ export default class SpriteProcessor extends Processor {
         });
 
         //Regenerate the projection view bind group
-        const projectionViewMatrixData: Float32Array = new Float32Array(mat4.multiply(mat4.create(),this.generateProjectionMatrix(),this.getMainCamera().getViewMatrix()));
+        const projectionViewMatrixData: Float32Array = new Float32Array(mat4.multiply(mat4.create(),this.generateProjectionMatrix(),this.getMainCamera()?.getViewMatrix() || mat4.create()));
         this._device!.queue.writeBuffer(this._projectionViewBuffer!, 0, projectionViewMatrixData);
         
         const commandEncoder = this._device!.createCommandEncoder();
@@ -553,12 +562,17 @@ export default class SpriteProcessor extends Processor {
         });
     }
 
+    private _projectionMatrix: mat4 | undefined;
     /**
      * Utility method that can be used to generate the projection matrix based on settings in the GlobalState
+     * @returns a cached projection matrix
      */
     private generateProjectionMatrix(): mat4 {
-        const right: number = GlobalState.viewDimensions.width / 2;
-        const top: number = GlobalState.viewDimensions.height / 2;
-        return mat4.ortho(mat4.create(),-1*right,right,-1*top,top,-1.0,1.0);
+        if(!this._projectionMatrix) {
+            const right: number = GlobalState.viewDimensions.width / 2;
+            const top: number = GlobalState.viewDimensions.height / 2;
+            this._projectionMatrix = mat4.ortho(mat4.create(),-1*right,right,-1*top,top,-1.0,1.0);
+        }
+        return this._projectionMatrix;
     }
 }

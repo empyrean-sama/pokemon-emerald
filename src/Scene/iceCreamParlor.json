@@ -94,7 +94,7 @@
         {
          "columns":6,
          "firstgid":1,
-         "image":"..\/img\/Tileset\/Ice_Cream_Shop_Design_layer_1.png",
+         "image":"..\/Image\/Tileset\/Ice_Cream_Shop_Design_layer_1.png",
          "imageheight":160,
          "imagewidth":192,
          "margin":0,
@@ -107,7 +107,7 @@
         {
          "columns":6,
          "firstgid":31,
-         "image":"..\/img\/Tileset\/Ice_Cream_Shop_Design_layer_2.png",
+         "image":"..\/Image\/Tileset\/Ice_Cream_Shop_Design_layer_2.png",
          "imageheight":160,
          "imagewidth":192,
          "margin":0,
@@ -120,7 +120,7 @@
         {
          "columns":6,
          "firstgid":61,
-         "image":"..\/img\/Tileset\/Ice_Cream_Shop_Design_layer_3.png",
+         "image":"..\/Image\/Tileset\/Ice_Cream_Shop_Design_layer_3.png",
          "imageheight":160,
          "imagewidth":192,
          "margin":0,

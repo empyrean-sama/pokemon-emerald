@@ -18,5 +18,5 @@ fn vertexMain(@location(0) position: vec4f, @location(1) texCoords: vec2f) -> Ve
 
 @fragment
 fn fragMain(fragData: VertexOutput) -> @location(0) vec4f {
-    return textureSample(tex,textureSampler,fragData.texCoords);    
+    return textureSample(tex,textureSampler,fragData.texCoords);
 }

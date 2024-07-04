@@ -4,8 +4,10 @@ import CScriptComponent from "../Engine/components/CScriptComponent";
 import CTransformComponent from "../Engine/components/CTransformComponent";
 import Input from "../Engine/Systems/Input";
 import { addSpriteComponent } from "../Engine/components/CSpriteComponent";
-import snekBodyTexture from '../img/snek-body.png'
+// import snekBodyTexture from '../img/snek-body.png'
 import GlobalState from "../Engine/Systems/GlobalState";
+
+//! this is BROKEN
 
 export default class SnekHeadScript extends CScriptComponent {
     
@@ -63,7 +65,7 @@ export default class SnekHeadScript extends CScriptComponent {
     private addBodyPart() {
         const bodyPart = new Actor();
         const bodyPartTransform: CTransformComponent = bodyPart.getComponent(CTransformComponent) as CTransformComponent;
-        addSpriteComponent(bodyPart, snekBodyTexture);
+        addSpriteComponent(bodyPart, 'placeholder'); //! this is a broken script 
        
         const lastBodyPart: Actor = this._bodyParts[this._bodyParts.length -1];
         const lastBodyPartPosition = (lastBodyPart.getComponent(CTransformComponent) as CTransformComponent).getPosition(); 

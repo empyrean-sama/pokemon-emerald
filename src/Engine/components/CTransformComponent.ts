@@ -91,15 +91,15 @@ export default class CTransformComponent extends CComponent {
      * @params scale: the scale to be set on this component
      */
     public setScale(scale: vec2): void {
-        this._transform[3] = scale[0];
-        this._transform[7] = scale[1];
+        this._transform[0] = scale[0];
+        this._transform[5] = scale[1];
     }
     /**
      * Utility method to get scale on the component
      * @returns the scale set on this component
      */
     public getScale(): vec2 {
-        return vec2.set(vec2.create(), this._transform[3], this._transform[7]);
+        return vec2.set(vec2.create(), this._transform[0], this._transform[5]);
     }
     /**
      * Utility function to scale
