@@ -530,7 +530,7 @@ export default class SpriteProcessor extends Processor {
      * @param samplerDescription: The defaults are fine for a game like pokemon, customize if required
      * @returns 
      */
-    private createSampler(samplerDescription: GPUSamplerDescriptor = {minFilter: "linear", magFilter: "linear"}): GPUSampler {
+    private createSampler(samplerDescription: GPUSamplerDescriptor = {minFilter: "nearest", magFilter: "nearest"}): GPUSampler {
         if(!this._device){
             throw new Error(`Cannot create a sampler without a device, The initialize method is probably not called in sprite processor. deviceObject: ${this._device}`);
         }

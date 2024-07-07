@@ -1,31 +1,3 @@
-@import './scss/reset';
-@import './scss/color';
-@import './scss/spacing';
-
-@import './scss/components/container';
-@import './scss/components/btn';
-@import './scss/components/size-control-panel';
-
 canvas{
-    transition: all .2s ease-in-out;
     border: 1px solid black;
-}
-
-canvas.size-original{
-    width: 240px;
-    height: 160px;
-}
-
-canvas.size-two-times{
-    width: 480px;
-    height: 320px;
-}
-
-canvas.size-four-times{
-    width: 960px;
-    height: 640px;
-}
-
-canvas.size-fill{
-    height: 100vh;
 }

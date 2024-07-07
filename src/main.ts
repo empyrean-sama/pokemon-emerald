@@ -6,7 +6,7 @@ import loadScene from "./Engine/Scene/Scene";
 import GlobalState from "./Engine/Systems/GlobalState";
 import ScriptProcessor from "./Engine/Systems/ScriptProcessor";
 import SpriteProcessor from "./Engine/Systems/SpriteProcessor";
-import setupViewSizeControlPanel from './setupViewSizeControlPanel';
+import { resizeCanvasTo2XSize } from './setupViewSizeControlPanel';
 import { addCameraComponent } from "./Engine/components/CCameraComponent";
 import CScriptComponent, { addScriptComponent } from "./Engine/components/CScriptComponent";
 import scriptMap from "./Engine/Resource/ScriptMap";
@@ -16,8 +16,9 @@ import ComponentType from "./Engine/Constructs/ComponentType";
  * This IIFE (Immediately Invoked Function Expression) will be called that is going to initialize the game engine  
  */
 (async function(){
-    //Setup the panel which controls the view size of the html canvas element
-    setupViewSizeControlPanel();
+    
+    //Resize the canvas to 2X original size at the start
+    resizeCanvasTo2XSize();
 
     //Initialize the processors
     const scriptProcessor = ScriptProcessor.getProcessor();
