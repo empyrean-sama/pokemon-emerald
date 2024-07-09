@@ -6,11 +6,13 @@ import loadScene from "./Engine/Scene/Scene";
 import GlobalState from "./Engine/Systems/GlobalState";
 import ScriptProcessor from "./Engine/Systems/ScriptProcessor";
 import SpriteProcessor from "./Engine/Systems/SpriteProcessor";
-import { resizeCanvasTo2XSize } from './setupViewSizeControlPanel';
+import { resizeCanvasTo4XSize } from './setupViewSizeControlPanel';
 import { addCameraComponent } from "./Engine/components/CCameraComponent";
 import CScriptComponent, { addScriptComponent } from "./Engine/components/CScriptComponent";
 import scriptMap from "./Engine/Resource/ScriptMap";
 import ComponentType from "./Engine/Constructs/ComponentType";
+
+import main from "./Engine/Imgui/main";
 
 /**
  * This IIFE (Immediately Invoked Function Expression) will be called that is going to initialize the game engine  
@@ -18,20 +20,24 @@ import ComponentType from "./Engine/Constructs/ComponentType";
 (async function(){
     
     //Resize the canvas to 2X original size at the start
-    resizeCanvasTo2XSize();
+    resizeCanvasTo4XSize();
+
+    // console.log("hello world");
+
+    main();
 
     //Initialize the processors
-    const scriptProcessor = ScriptProcessor.getProcessor();
-    const spriteProcessor = SpriteProcessor.getProcessor();
-    await scriptProcessor.initialize();
-    await spriteProcessor.initialize();
+    // const scriptProcessor = ScriptProcessor.getProcessor();
+    // const spriteProcessor = SpriteProcessor.getProcessor();
+    // await scriptProcessor.initialize();
+    // await spriteProcessor.initialize();
     
-    loadScene(GlobalState.startScene);
+    // loadScene(GlobalState.startScene);
 
-    const cameraActor = new Actor();
-    const cameraComp = addCameraComponent(cameraActor, true);
-    cameraComp.setAsMainCamera();
-    addScriptComponent(cameraActor, scriptMap.get('CameraActorScript') as ComponentType<CScriptComponent>);
+    // const cameraActor = new Actor();
+    // const cameraComp = addCameraComponent(cameraActor, true);
+    // cameraComp.setAsMainCamera();
+    // addScriptComponent(cameraActor, scriptMap.get('CameraActorScript') as ComponentType<CScriptComponent>);
 
     // const actor = new Actor();
     // addSpriteComponent(actor, imageMap.get('Ice_Cream_Shop_Design_layer_1') as string, new UVRect(
@@ -57,7 +63,7 @@ import ComponentType from "./Engine/Constructs/ComponentType";
     // transformComponent3.setWidth(100);
 
     //this is the main game loop
-    requestAnimationFrame(drawFrame);
+    // requestAnimationFrame(drawFrame);
 })();
 
 /**
