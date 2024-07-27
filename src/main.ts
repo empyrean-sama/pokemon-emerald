@@ -13,6 +13,7 @@ import scriptMap from "./Engine/Resource/ScriptMap";
 import ComponentType from "./Engine/Constructs/ComponentType";
 
 import main from "./Engine/Imgui/main";
+import { InitializeRenderer } from "./Engine/Renderer";
 
 /**
  * This IIFE (Immediately Invoked Function Expression) will be called that is going to initialize the game engine  
@@ -22,7 +23,8 @@ import main from "./Engine/Imgui/main";
     //Resize the canvas to 2X original size at the start
     resizeCanvasTo4XSize();
 
-    // console.log("hello world");
+    //Init renderer
+    await InitializeRenderer();
 
     main();
 

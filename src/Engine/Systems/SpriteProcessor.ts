@@ -141,20 +141,20 @@ export default class SpriteProcessor extends Processor {
      */
     public override async initialize(){
 
-        //Get context and adapter
-        const canvasContext = GlobalState.view.getContext("webgpu");
-        const adapter = await navigator.gpu.requestAdapter({powerPreference: "high-performance"});
-        if(!canvasContext || !adapter){
-            throw new Error('this device does not support webgpu');
-        }
+        // //Get context and adapter
+        // const canvasContext = GlobalState.view.getContext("webgpu");
+        // const adapter = await navigator.gpu.requestAdapter({powerPreference: "high-performance"});
+        // if(!canvasContext || !adapter){
+        //     throw new Error('this device does not support webgpu');
+        // }
 
-        //Configure the canvas context
-        this._device = await adapter.requestDevice();
-        canvasContext.configure({
-            device: this._device,
-            format: navigator.gpu.getPreferredCanvasFormat()
-        });
-        this._canvasContext = canvasContext;
+        // //Configure the canvas context
+        // this._device = await adapter.requestDevice();
+        // canvasContext.configure({
+        //     device: this._device,
+        //     format: navigator.gpu.getPreferredCanvasFormat()
+        // });
+        // this._canvasContext = canvasContext;
 
         //Create the shader module
         const shaderModule = this._device.createShaderModule({code: defaultSpriteShader});

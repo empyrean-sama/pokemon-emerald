@@ -9,3 +9,7 @@ export default class GlobalState {
     public static readonly spriteDimensions = {width: 8, height: 8};
     public static readonly startScene: string = "iceCreamParlor";
 }
+
+class RendererState {
+    public canvasContext: GPUCanvasContext | undefined;
+}
