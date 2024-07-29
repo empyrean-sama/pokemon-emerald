@@ -1,10 +1,10 @@
-import * as Emscripten from "./emscripten";
+import * as Emscripten from "../../interfaces/emscripten";
 
 // emcc -s MODULARIZE=0
 // declare const Module: Module; export default Module;
 
 // emcc -s MODULARIZE=1
-export default function Module(Module?: Partial<Module>): Module;
+// export default function Module(Module?: Partial<Module>): Module;
 
 export interface mallinfo {
     arena: number;
@@ -194,7 +194,7 @@ export interface reference_ImGuiSizeCallbackData extends Emscripten.EmscriptenCl
     DesiredSize: reference_ImVec2;
 }
 
-export class ImGuiListClipper extends Emscripten.EmscriptenClass {
+export declare class ImGuiListClipper extends Emscripten.EmscriptenClass {
     public DisplayStart: number;
     public DisplayEnd: number;
 
@@ -334,7 +334,7 @@ export interface interface_ImGuiStyle {
     ScaleAllSizes(scale_factor: number): void;
 }
 
-export class ImGuiStyle extends Emscripten.EmscriptenClass implements interface_ImGuiStyle {
+export declare class ImGuiStyle extends Emscripten.EmscriptenClass implements interface_ImGuiStyle {
     Alpha: number;
     DisabledAlpha: number;
     readonly WindowPadding: reference_ImVec2;

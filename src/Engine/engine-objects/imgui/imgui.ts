@@ -5,13 +5,15 @@ export interface XYZW extends XYZ { w: number; }
 export interface RGB { r: number; g: number; b: number; }
 export interface RGBA extends RGB { a: number; }
 
-import * as Bind from "./bind-imgui.js";
+// import type bindImguiDeclaration from './bind-imgui.d.ts';
+import bindImgui from './bind-imgui';
+import * as Bind from './imgui.types';
 export { Bind };
 
 let bind: Bind.Module;
 export default async function(value?: Partial<Bind.Module>): Promise<void> {
     return new Promise<void>((resolve: () => void) => {
-        Bind(value).then((value: Bind.Module): void => {
+        bindImgui(value).then((value: Bind.Module): void => {
             bind = value;
             resolve();
         });
@@ -85,7 +87,7 @@ function export_Color4(tuple: Bind.ImTuple4<number>, col: RGBA | Bind.ImTuple4<n
     col.x = tuple[0]; col.y = tuple[1]; col.z = tuple[2]; col.w = tuple[3];
 }
 
-import * as config from "./imconfig.js";
+import * as config from "./imconfig";
 
 export { IMGUI_VERSION as VERSION }
 export const IMGUI_VERSION: string = "1.86"; // bind.IMGUI_VERSION;
@@ -808,8 +810,8 @@ export enum ImDrawListFlags
 export { ImU32 as U32 }
 export type ImU32 = Bind.ImU32;
 
-export { interface_ImVec2 } from "./bind-imgui";
-export { reference_ImVec2 } from "./bind-imgui";
+export { interface_ImVec2 } from "./imgui.types";
+export { reference_ImVec2 } from "./imgui.types";
 
 export { ImVec2 as Vec2 }
 export class ImVec2 implements Bind.interface_ImVec2 {
@@ -839,8 +841,8 @@ export class ImVec2 implements Bind.interface_ImVec2 {
     }
 }
 
-export { interface_ImVec4 } from "./bind-imgui";
-export { reference_ImVec4 } from "./bind-imgui";
+export { interface_ImVec4 } from "./imgui.types";
+export { reference_ImVec4 } from "./imgui.types";
 
 export { ImVec4 as Vec4 }
 export class ImVec4 implements Bind.interface_ImVec4 {
