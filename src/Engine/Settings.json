@@ -1,0 +1,4 @@
+//Global settings for the project
+{
+    "mode": "debug" //can be "debug" or "release", certain features like the editor are only enabled in debug.
+}
