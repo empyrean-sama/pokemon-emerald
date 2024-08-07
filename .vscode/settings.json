@@ -1,10 +1,13 @@
 {
     "cSpell.words": [
+        "CHECKVERSION",
+        "codepaths",
         "compressionlevel",
         "draworder",
         "endregion",
         "falsey",
         "firstgid",
+        "Gameboy",
         "IIFE",
         "imageheight",
         "imagewidth",
@@ -17,6 +20,7 @@
         "Pixi",
         "renderorder",
         "snek",
+        "swappable",
         "tilecount",
         "tiledversion",
         "tileheight",
@@ -25,6 +29,7 @@
         "tilesets",
         "tilewidth",
         "topdown",
+        "tsbuildinfo",
         "unorm"
     ]
 }

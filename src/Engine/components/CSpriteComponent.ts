@@ -1,7 +1,8 @@
-import Actor from "../Actor";
-import SpriteProcessor from "../Systems/SpriteProcessor";
-import CComponent,{ComponentRegistry} from "./CComponent";
 import { vec2 } from "gl-matrix";
+
+import Actor from "../Actor";
+import CComponent,{ EComponentType } from "./CComponent";
+import { RenderingState } from "../rendering/Rendering";
 
 export class UVRect {
     public topLeft: vec2;
@@ -18,51 +19,92 @@ export class UVRect {
      * @param bottomRight : bottom right uv coordinate
      */
     constructor(topLeft?: vec2, topRight?: vec2, bottomLeft?: vec2, bottomRight?: vec2) {
-        this.topLeft = topLeft || vec2.set(vec2.create(),0,0);
-        this.topRight = topRight || vec2.set(vec2.create(),1,0);
-        this.bottomRight = bottomRight || vec2.set(vec2.create(),1,1);
-        this.bottomLeft = bottomLeft || vec2.set(vec2.create(),0,1);
+        this.topLeft = topLeft || vec2.set(vec2.create(), 0, 0);
+        this.topRight = topRight || vec2.set(vec2.create(), 1, 0);
+        this.bottomRight = bottomRight || vec2.set(vec2.create(), 1, 1);
+        this.bottomLeft = bottomLeft || vec2.set(vec2.create(), 0, 1);
+    }
+
+    public getCopy(): UVRect {
+        const newTopLeft        = vec2.set(vec2.create(), this.topLeft[0],      this.topLeft[1]);
+        const newTopRight       = vec2.set(vec2.create(), this.topRight[0],     this.topRight[1]);
+        const newBottomLeft     = vec2.set(vec2.create(), this.bottomLeft[0],   this.bottomLeft[1]);
+        const newBottomRight    = vec2.set(vec2.create(), this.bottomRight[0],  this.bottomRight[1]);
+        return new UVRect(newTopLeft, newTopRight, newBottomLeft, newBottomRight);
+    }
+
+    /**
+     * Copy all the values from another UVRect to this
+     * @param uvRect: another uvRect to copy values from
+     */
+    public copyFrom(uvRect: UVRect) {
+        this.topLeft        = vec2.set(vec2.create(), uvRect.topLeft[0],      uvRect.topLeft[1]);
+        this.topRight       = vec2.set(vec2.create(), uvRect.topRight[0],     uvRect.topRight[1]);
+        this.bottomLeft     = vec2.set(vec2.create(), uvRect.bottomLeft[0],   uvRect.bottomLeft[1]);
+        this.bottomRight    = vec2.set(vec2.create(), uvRect.bottomRight[0],  uvRect.bottomRight[1]);
     }
 }
 
 export default class CSpriteComponent extends CComponent{
     
-    //getComponentType overrides for this class to function
-    public override getComponentType(): string {
-        return ComponentRegistry.CSpriteComponent;
+    public override getComponentType(): EComponentType {
+        return EComponentType.CSpriteComponent;
     }
-    public static override getComponentType(): string {
-        return ComponentRegistry.CSpriteComponent;
+    public static override getComponentType(): EComponentType {
+        return EComponentType.CSpriteComponent;
     }
 
-    private _textureURL: string = '';
+    private _textureURL: string;
     private _uvCoordinatesRect: UVRect;
 
-    constructor(owningActor: Actor, textureURL: string, uvCoordinates: UVRect) {
+    /**
+     * Construct a CSpriteComponent
+     * @param owningActor is the actor to which this component is attached
+     * @param textureURL is the url of the texture this component is to display
+     * @param uvCoordinates are coordinates inside the texture that make up this sprite to be displayed
+     */
+    constructor(owningActor: Actor, textureURL: string, uvCoordinates?: UVRect) {
         //register this component on the actor
         super(owningActor);
 
         //fill up the component memory
         this._textureURL = textureURL;
-        this._uvCoordinatesRect = uvCoordinates;
+        this._uvCoordinatesRect = uvCoordinates || new UVRect();
 
-        //Sprite processor must actively monitor and draw this component to screen
-        const spriteProcessor = SpriteProcessor.getProcessor();
-        spriteProcessor.submitTextureURL(this._textureURL);
+        //Submit the textureURL for RenderingState to process
+        RenderingState.submitTextureURL(textureURL);
     }
 
     /**
-     * ! Not recommended to use this method outside processor, the only reason to expose this method is because typescript has no equivalent to friend.
+     * Utility function to get the textureURL held by this component
+     * @returns the textureURL which is held by the spriteComponent
      */
     public getTextureURL(): string {
         return this._textureURL;
     }
 
     /**
-     * ! Not recommended to use this method outside processor, the only reason to expose this method is because typescript has no equivalent to friend.
+     * Function to set the textureURL
+     */
+    public setTextureURL(textureURL: string) {
+        this._textureURL = textureURL;
+        RenderingState.submitTextureURL(textureURL);
+    }
+
+    /**
+     * Get a copy of the UVCoordinates stored inside this component
+     * @returns a copy of the UVCoordinates stored inside the CSpriteComponent
      */
     public getUVCoordinates(): UVRect {
-        return this._uvCoordinatesRect;
+        return this._uvCoordinatesRect.getCopy();
+    }
+
+    /**
+     * Set the UVCoordinates stored in this component
+     * @param uvRect: the structure from which data needs to be copied 
+     */
+    public setUVCoordinates(uvRect: UVRect): void {
+        this._uvCoordinatesRect.copyFrom(uvRect);
     }
 }
 

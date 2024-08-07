@@ -1,30 +1,45 @@
-import Type from "./Constructs/ComponentType";
-import GlobalComponentStore from "./Systems/GlobalComponentStore";
-
-import CComponent from "./components/CComponent";
+import CComponent, { IComponentType } from "./components/CComponent";
 import CTransformComponent from "./components/CTransformComponent";
+import GlobalState from "./GlobalState";
 
 /**
  * An actor is a symbol to which multiple components are linked, 
  * it is actually the components and not the actors which actually do stuff
  */
 export default class Actor {
-    public readonly id = Symbol(); //? why do I need a symbol that is non serializable, maybe get me a uuid for debugging..
-    constructor() {
+    private _label: string;
+    constructor(label?: string) {
+        this._label = label || "no_label_actor";
         this.addComponent(CTransformComponent);
     }
 
     /**
-     * This method can be used to add a component to the actor in question, simply specify which component by passing in the constructor function
-     * @param componentType: the constructor function of the component to be constructed
+     * Get a string identifying this actor
+     * @returns a string containing the actors label set during construction
      */
-    public addComponent<T extends CComponent>(componentType: Type<T>, ...args: any[]): T {
-        //Create the component in question
-        const component = new componentType(this,...args);
+    public getLabel(): string {
+        return this._label;
+    }
+
+    /** A cache for components associated with the actor */
+    private components = new Array<CComponent>();
+
+    /**
+     * Adds any type of component to this actor 
+     * @param componentType: the constructor function of the component to be constructed
+     * @throws if a component of componentType.getComponentType() already exists on the actor
+     */
+    public addComponent<T extends CComponent>(componentType: IComponentType<T>, ...args: any[]): T {
+        if(this.components.find((component: CComponent) => component.getComponentType() === componentType.getComponentType())) {
+            throw new Error(`A component of type '${componentType.getComponentType()}' already exists on the actor '${this._label}', trying to add it again caused this error to be thrown`);
+        }
         
-        //Registering it on the global store means it will be available for all the processes inside the engine
-        const globalComponentStore = GlobalComponentStore.getGlobalComponentStore();
-        globalComponentStore.registerComponent(this,component);
+        //Create the component in question
+        const component = new componentType(this, ...args);
+
+        //Register it in global state and also include it as part of actor cache
+        GlobalState.registerComponent(component);
+        this.components.push(component);
 
         //Return a handle to the created component
         return component;
@@ -34,8 +49,8 @@ export default class Actor {
      * Gets the component on the actor if it exists, else null
      * @param componentType: try to get this type of component on the actor
      */
-    public getComponent<T extends CComponent>(componentType: Type<T>): CComponent | null {
-        return GlobalComponentStore.getGlobalComponentStore().getComponent(this, componentType);
+    public getComponent<T extends CComponent>(componentType: IComponentType<T>): CComponent | null {
+        return this.components.find((component: CComponent) => component.getComponentType() === componentType.getComponentType()) || null;
     }
 
     /**

@@ -1,7 +1,7 @@
 import { mat4, vec2, vec3 } from "gl-matrix";
 import Actor from "../Actor";
-import SpriteProcessor from "../Systems/SpriteProcessor";
-import CComponent,{ComponentRegistry} from "./CComponent";
+import CComponent,{ EComponentType } from "./CComponent";
+import { RenderingState } from "../rendering/Rendering";
 
 /**
  * This component can perform transformation actions on every actor in the world except the one it is attached to
@@ -10,12 +10,11 @@ import CComponent,{ComponentRegistry} from "./CComponent";
  */
 export default class CCameraComponent extends CComponent {
     
-    //getComponentType overrides for this class to function
-    public override getComponentType(): string {
-        return ComponentRegistry.CCameraComponent;
+    public override getComponentType(): EComponentType {
+        return EComponentType.CCameraComponent;
     }
-    public static override getComponentType(): string {
-        return ComponentRegistry.CCameraComponent;
+    public static override getComponentType(): EComponentType {
+        return EComponentType.CCameraComponent;
     }
 
     //State inside this component
@@ -30,7 +29,7 @@ export default class CCameraComponent extends CComponent {
      * @param rotation: rotation of this camera component in this world, gl-matrix defaults if not provided
      * @param scale: zoom of the camera in this world, gl-matrix defaults if not provided
      */
-    constructor(owningActor: Actor, attachToActor = false, position?: vec2, rotation?: number, scale?: vec2) {
+    constructor(owningActor: Actor, setAsMainCamera = false, attachToActor = false, position?: vec2, rotation?: number, scale?: vec2) {
         super(owningActor);
         this._viewMatrix = mat4.create(); //a new matrix to serve as the view matrix
         this._attachToActor = attachToActor;
@@ -49,6 +48,10 @@ export default class CCameraComponent extends CComponent {
         {
             const scaleVec = vec3.set(vec3.create(),scale[0] || 0.0, scale[1] || 0.0, 1.0);
             mat4.scale(this._viewMatrix, this._viewMatrix, scaleVec);
+        }
+
+        if(setAsMainCamera) {
+            this.setAsMainCamera();
         }
     }
 
@@ -78,11 +81,11 @@ export default class CCameraComponent extends CComponent {
 
     /**
      * This function sets this camera up as the main camera from which the player views the world
-     * There can only be one main camera at any given time
-     * The last instance to call this method will always be the main camera going forward, no errors will be generated.
+     * ? There can only be one main camera at any given time
+     * ? The last instance to call this method will always be the main camera going forward
      */
     public setAsMainCamera(){
-        SpriteProcessor.getProcessor().setMainCamera(this);
+        RenderingState.setGameCameraMatrix(this._viewMatrix);
     }
 }
 

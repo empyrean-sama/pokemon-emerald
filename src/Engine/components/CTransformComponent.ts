@@ -1,7 +1,8 @@
-import CComponent,{ComponentRegistry} from "./CComponent";
+import CComponent,{ EComponentType } from "./CComponent";
 import Actor from "../Actor";
 import { mat4, vec2, vec3 } from "gl-matrix";
-import GlobalState from "../Systems/GlobalState";
+import GlobalState from "../GlobalState";
+import { RenderingState } from "../rendering/Rendering";
 
 /**
  * This component is created in the actor's constructor by default.
@@ -117,7 +118,7 @@ export default class CTransformComponent extends CComponent {
      * @param width: Width to be set in pixels
      */
     public setWidth(width: number) {
-        const spriteWidth = GlobalState.spriteDimensions.width;
+        const spriteWidth = RenderingState.getActorDimensions().width;
         this.setScale(vec2.set(vec2.create(), width / spriteWidth, this.getScale()[1]));
     }
     /**
@@ -127,7 +128,7 @@ export default class CTransformComponent extends CComponent {
      * @returns the Width of this actor in pixels
      */
     public getWidth(): number {
-        return this.getScale()[0] * GlobalState.spriteDimensions.width;
+        return this.getScale()[0] * RenderingState.getActorDimensions().width;
     }
     /**
      * Utility function to set height on the transform component
@@ -136,7 +137,7 @@ export default class CTransformComponent extends CComponent {
      * @param height: Height to be set in pixels
      */
     public setHeight(height: number): void {
-        this.setScale(vec2.set(vec2.create(), this.getScale()[0], height / GlobalState.spriteDimensions.height));
+        this.setScale(vec2.set(vec2.create(), this.getScale()[0], height / RenderingState.getActorDimensions().height));
     }
     /**
      * Utility function to set Height on the transform component
@@ -145,13 +146,13 @@ export default class CTransformComponent extends CComponent {
      * @param height: Height to be set in pixels
      */
     public getHeight(): number {
-        return this.getScale()[1] * GlobalState.spriteDimensions.height;
+        return this.getScale()[1] * RenderingState.getActorDimensions().height;
     }
 
-    public override getComponentType(): string {
-        return ComponentRegistry.CTransformComponent;
+    public override getComponentType(): EComponentType {
+        return EComponentType.CTransformComponent;
     }
-    public static override getComponentType(): string {
-        return ComponentRegistry.CTransformComponent;
+    public static override getComponentType(): EComponentType {
+        return EComponentType.CTransformComponent;
     }
 }
